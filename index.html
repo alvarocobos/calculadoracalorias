@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de calorías y macros | Método F90 — Álvaro Cobos</title>
+<meta name="description" content="Calcula tus calorías diarias y tus macros con la fórmula Harris-Benedict. Metabolismo basal, gasto total y objetivo según quieras perder grasa, mantener o ganar músculo. Gratis y en 30 segundos.">
+<meta name="theme-color" content="#0A0908">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Calculadora de calorías y macros | Método F90">
+<meta property="og:description" content="Tus calorías y tus macros en 30 segundos, con la fórmula Harris-Benedict. Sin registros y sin humo.">
+<meta property="og:image" content="assets/img/og-f90.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="assets/img/logo-f90-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/css/styles.css">
+
+<!-- El revelado al hacer scroll lo activa el JavaScript. Si no hay JavaScript,
+     estas secciones se quedarían invisibles: aquí las devolvemos a la vista. -->
+<noscript><style>.reveal{opacity:1 !important;transform:none !important}</style></noscript>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<a class="skip-link" href="#calculadora">Saltar a la calculadora</a>
+
+<!-- Iconos reutilizados en toda la página -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-equal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14"/></symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="3"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15v4M8 19h4"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 6.9 8.9a7 7 0 1 0 10.2 0Z"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M5 21h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2Z"/><path d="M8.5 11.5 12 9l3.5 2.5"/></symbol>
+  <symbol id="i-speed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="m14.1 9.9 3.6-3.6"/><path d="M4 19a9 9 0 1 1 16 0"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></symbol>
+  <symbol id="i-man" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="6"/><path d="M14.5 9.5 21 3M16 3h5v5"/></symbol>
+  <symbol id="i-woman" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M12 15v7M9 19h6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></symbol>
+  <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.465 3.488"/></symbol>
+</svg>
+
+<!-- ══════════════════════════ CABECERA ══════════════════════════ -->
+<header class="site-header" id="siteHeader">
+  <div class="wrap site-header__inner">
+    <a class="logo" href="#top" aria-label="Método F90 — Álvaro Cobos">
+      <picture>
+        <source srcset="assets/img/logo-f90-mark.webp" type="image/webp">
+        <img src="assets/img/logo-f90-mark.png" alt="Método F90" width="34" height="34">
+      </picture>
+    </a>
+    <nav class="nav-links" aria-label="Navegación principal">
+      <a href="#calculadora">Calculadora</a>
+      <a href="#despues">Y ahora qué</a>
+      <a href="#metodo">Cómo se calcula</a>
+      <a href="#faq">Dudas</a>
+    </nav>
+    <a class="btn btn--sm btn--primary js-cta" href="#contacto">Quiero mi plan</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ══════════════════════════ PORTADA ══════════════════════════ -->
+<section class="hero">
+  <div class="wrap hero__inner">
+    <p class="pill entra" style="--d:.05s">⚡ Gratis · Sin registro · 30 segundos</p>
+
+    <h1 class="titular">
+      <span class="linea"><span>Cuántas calorías</span></span>
+      <span class="linea"><span class="accent">necesitas de verdad</span></span>
+    </h1>
+
+    <p class="hero__sub lead entra" style="--d:.5s">
+      Calcula tu metabolismo basal, tu gasto real y las calorías exactas para tu objetivo
+      con la fórmula <strong>Harris-Benedict</strong>. Te doy también el reparto de
+      proteína, carbohidrato y grasa, que es lo que de verdad marca la diferencia.
+    </p>
+
+    <p class="hero__note entra" style="--d:.68s">Tus datos no salen de tu móvil</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════ CALCULADORA ══════════════════════════ -->
+<section class="calc" id="calculadora">
+  <div class="wrap calc__grid">
+
+    <!-- ─────────── Entrada ─────────── -->
+    <div class="panel calc__panel--in entra" style="--d:.8s">
+      <div class="panel__head">
+        <h2>Tus datos</h2>
+        <span class="panel__step">Paso 1</span>
+      </div>
+
+      <form id="form" class="campos" novalidate>
+
+        <!-- Sexo -->
+        <div class="campo">
+          <span class="campo__lbl" id="lbl-sexo">Sexo</span>
+          <div class="seg" role="radiogroup" aria-labelledby="lbl-sexo">
+            <label>
+              <input type="radio" name="sexo" value="hombre" checked>
+              <span><svg aria-hidden="true"><use href="#i-man"/></svg>Hombre</span>
+            </label>
+            <label>
+              <input type="radio" name="sexo" value="mujer">
+              <span><svg aria-hidden="true"><use href="#i-woman"/></svg>Mujer</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Edad · Altura · Peso -->
+        <div class="fila">
+          <div class="campo">
+            <label class="campo__lbl" for="edad">Edad</label>
+            <div class="num">
+              <input type="number" id="edad" name="edad" inputmode="numeric"
+                     min="14" max="100" step="1" placeholder="30" autocomplete="off">
+              <span class="num__u" aria-hidden="true">años</span>
+            </div>
+          </div>
+          <div class="campo">
+            <label class="campo__lbl" for="altura">Altura</label>
+            <div class="num">
+              <input type="number" id="altura" name="altura" inputmode="numeric"
+                     min="120" max="230" step="1" placeholder="175" autocomplete="off">
+              <span class="num__u" aria-hidden="true">cm</span>
+            </div>
+          </div>
+          <div class="campo">
+            <label class="campo__lbl" for="peso">Peso</label>
+            <div class="num">
+              <input type="number" id="peso" name="peso" inputmode="decimal"
+                     min="35" max="250" step="0.1" placeholder="78" autocomplete="off">
+              <span class="num__u" aria-hidden="true">kg</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actividad -->
+        <div class="campo">
+          <span class="campo__lbl" id="lbl-act">
+            Actividad
+            <span class="campo__hint">Cuenta todo: entrenos, trabajo y vida diaria</span>
+          </span>
+          <div class="acts" role="radiogroup" aria-labelledby="lbl-act">
+            <label class="act">
+              <input type="radio" name="actividad" value="1.2">
+              <span class="act__box">
+                <span class="act__dot" aria-hidden="true"></span>
+                <span class="act__txt">
+                  <b class="act__t">Sedentario</b>
+                  <small class="act__d">Oficina y poco o nada de ejercicio</small>
+                </span>
+                <span class="act__f" aria-hidden="true">×1,2</span>
+              </span>
+            </label>
+            <label class="act">
+              <input type="radio" name="actividad" value="1.375">
+              <span class="act__box">
+                <span class="act__dot" aria-hidden="true"></span>
+                <span class="act__txt">
+                  <b class="act__t">Ligero</b>
+                  <small class="act__d">Entreno suave 1-3 días por semana</small>
+                </span>
+                <span class="act__f" aria-hidden="true">×1,375</span>
+              </span>
+            </label>
+            <label class="act">
+              <input type="radio" name="actividad" value="1.55" checked>
+              <span class="act__box">
+                <span class="act__dot" aria-hidden="true"></span>
+                <span class="act__txt">
+                  <b class="act__t">Moderado</b>
+                  <small class="act__d">Entreno 3-5 días por semana</small>
+                </span>
+                <span class="act__f" aria-hidden="true">×1,55</span>
+              </span>
+            </label>
+            <label class="act">
+              <input type="radio" name="actividad" value="1.725">
+              <span class="act__box">
+                <span class="act__dot" aria-hidden="true"></span>
+                <span class="act__txt">
+                  <b class="act__t">Alto</b>
+                  <small class="act__d">Entreno fuerte 6-7 días por semana</small>
+                </span>
+                <span class="act__f" aria-hidden="true">×1,725</span>
+              </span>
+            </label>
+            <label class="act">
+              <input type="radio" name="actividad" value="1.9">
+              <span class="act__box">
+                <span class="act__dot" aria-hidden="true"></span>
+                <span class="act__txt">
+                  <b class="act__t">Muy alto</b>
+                  <small class="act__d">Doble sesión o trabajo físico duro</small>
+                </span>
+                <span class="act__f" aria-hidden="true">×1,9</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Objetivo -->
+        <div class="campo">
+          <span class="campo__lbl" id="lbl-obj">Objetivo</span>
+          <div class="seg seg--wrap" role="radiogroup" aria-labelledby="lbl-obj">
+            <label>
+              <input type="radio" name="objetivo" value="perder" checked>
+              <span><svg aria-hidden="true"><use href="#i-down"/></svg>Perder grasa</span>
+            </label>
+            <label>
+              <input type="radio" name="objetivo" value="mantener">
+              <span><svg aria-hidden="true"><use href="#i-equal"/></svg>Mantener</span>
+            </label>
+            <label>
+              <input type="radio" name="objetivo" value="ganar">
+              <span><svg aria-hidden="true"><use href="#i-up"/></svg>Ganar músculo</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Ritmo (se oculta en «mantener») -->
+        <div class="campo" id="campoRitmo">
+          <span class="campo__lbl" id="lbl-ritmo">
+            Ritmo
+            <span class="campo__hint" id="hintRitmo">Cuanto más agresivo, más difícil de sostener</span>
+          </span>
+          <div class="seg" role="radiogroup" aria-labelledby="lbl-ritmo">
+            <label>
+              <input type="radio" name="ritmo" value="suave">
+              <span>Suave</span>
+            </label>
+            <label>
+              <input type="radio" name="ritmo" value="moderado" checked>
+              <span>Moderado</span>
+            </label>
+            <label>
+              <input type="radio" name="ritmo" value="agresivo">
+              <span>Agresivo</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Avanzado -->
+        <details class="avanzado">
+          <summary>Ajustes avanzados</summary>
+          <div class="avanzado__body">
+            <div class="campo">
+              <span class="campo__lbl" id="lbl-formula">
+                Fórmula
+                <span class="campo__hint">Mifflin suele afinar más si tienes sobrepeso</span>
+              </span>
+              <div class="seg seg--stack" role="radiogroup" aria-labelledby="lbl-formula">
+                <label>
+                  <input type="radio" name="formula" value="hb" checked>
+                  <span>Harris-Benedict<small>La clásica</small></span>
+                </label>
+                <label>
+                  <input type="radio" name="formula" value="msj">
+                  <span>Mifflin-St Jeor<small>La más precisa</small></span>
+                </label>
+              </div>
+            </div>
+            <div class="campo">
+              <label class="campo__lbl" for="proteina">
+                Proteína
+                <span class="campo__hint">Gramos por kilo de peso corporal</span>
+              </label>
+              <div class="num">
+                <input type="number" id="proteina" name="proteina" inputmode="decimal"
+                       min="1" max="3.5" step="0.1" autocomplete="off">
+                <span class="num__u" aria-hidden="true">g/kg</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <div class="error" id="error" role="alert" hidden>
+          <svg aria-hidden="true"><use href="#i-warn"/></svg>
+          <span id="errorTxt"></span>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ─────────── Resultado ─────────── -->
+    <div class="panel panel--out calc__panel--out entra" style="--d:.9s">
+      <div class="panel__head">
+        <h2>Tu resultado</h2>
+        <span class="panel__step">Paso 2</span>
+      </div>
+
+      <!-- Estado inicial -->
+      <div class="vacio" id="vacio">
+        <div class="vacio__ico"><svg aria-hidden="true"><use href="#i-calc"/></svg></div>
+        <h3>Rellena tus datos</h3>
+        <p>En cuanto pongas edad, altura y peso verás aquí tus números. Se calculan solos.</p>
+      </div>
+
+      <!-- Resultado -->
+      <div id="res" hidden aria-live="polite">
+        <div class="res">
+
+          <div class="res__hero">
+            <span class="res__lbl" id="resLbl">Comer al día</span>
+            <strong class="res__big" id="resKcal">0</strong>
+            <span class="res__u">kilocalorías al día</span>
+            <p class="res__delta" id="resDelta" style="margin:15px 0 0">
+              <svg aria-hidden="true"><use href="#i-down"/></svg>
+              <span id="resDeltaTxt"></span>
+            </p>
+          </div>
+
+          <div class="res__pair">
+            <div class="mini">
+              <span class="mini__l">
+                Metabolismo basal
+                <span class="tip">
+                  <button type="button" class="tip__btn" aria-label="Qué es el metabolismo basal">?</button>
+                  <span class="tip__txt" role="tooltip">Lo que tu cuerpo quema en reposo absoluto, solo por estar vivo. Nunca deberías comer por debajo de esta cifra.</span>
+                </span>
+              </span>
+              <strong class="mini__v" id="resTmb">0<i>kcal</i></strong>
+            </div>
+            <div class="mini">
+              <span class="mini__l">
+                Mantenimiento
+                <span class="tip">
+                  <button type="button" class="tip__btn" aria-label="Qué es el mantenimiento">?</button>
+                  <span class="tip__txt" role="tooltip">Tu gasto total del día, con la actividad incluida. Comiendo esto, tu peso se queda como está.</span>
+                </span>
+              </span>
+              <strong class="mini__v" id="resTdee">0<i>kcal</i></strong>
+            </div>
+          </div>
+
+          <div class="macros__h">
+            <h3>Tus macros</h3>
+          </div>
+          <div class="barra" id="barra" aria-hidden="true">
+            <i class="b-pro" id="barPro" style="width:30%"></i>
+            <i class="b-car" id="barCar" style="width:45%"></i>
+            <i class="b-gra" id="barGra" style="width:25%"></i>
+          </div>
+          <ul class="macros">
+            <li class="macro macro--pro">
+              <span class="macro__c" aria-hidden="true"></span>
+              <span class="macro__n">Proteína</span>
+              <span class="macro__k" id="kcalPro">0 kcal</span>
+              <strong class="macro__g" id="gPro">0<i>g</i></strong>
+            </li>
+            <li class="macro macro--car">
+              <span class="macro__c" aria-hidden="true"></span>
+              <span class="macro__n">Carbohidratos</span>
+              <span class="macro__k" id="kcalCar">0 kcal</span>
+              <strong class="macro__g" id="gCar">0<i>g</i></strong>
+            </li>
+            <li class="macro macro--gra">
+              <span class="macro__c" aria-hidden="true"></span>
+              <span class="macro__n">Grasas</span>
+              <span class="macro__k" id="kcalGra">0 kcal</span>
+              <strong class="macro__g" id="gGra">0<i>g</i></strong>
+            </li>
+          </ul>
+
+          <div class="extras">
+            <div class="extra">
+              <span class="extra__i"><svg aria-hidden="true"><use href="#i-drop"/></svg></span>
+              <span class="extra__t">
+                <span class="extra__l">Agua</span>
+                <strong class="extra__v" id="resAgua">0<small>L</small></strong>
+              </span>
+            </div>
+            <div class="extra">
+              <span class="extra__i"><svg aria-hidden="true"><use href="#i-speed"/></svg></span>
+              <span class="extra__t">
+                <span class="extra__l">Ritmo</span>
+                <strong class="extra__v" id="resRitmo">0<small>kg/sem</small></strong>
+              </span>
+            </div>
+            <div class="extra">
+              <span class="extra__i"><svg aria-hidden="true"><use href="#i-scale"/></svg></span>
+              <span class="extra__t">
+                <span class="extra__l">IMC</span>
+                <strong class="extra__v" id="resImc">0</strong>
+                <span class="extra__n" id="resImcTxt"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="suelo" id="suelo" hidden>
+            <svg aria-hidden="true"><use href="#i-warn"/></svg>
+            <span id="sueloTxt"></span>
+          </div>
+
+          <div class="res__cta">
+            <a class="btn btn--primary js-cta-res" href="#" id="ctaRes">
+              <svg class="ico" aria-hidden="true"><use href="#i-whatsapp"/></svg>
+              Que Álvaro revise mis números
+            </a>
+            <div class="res__acciones">
+              <button type="button" class="btn btn--ghost btn--sm" id="btnCopiar">
+                <svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg>
+                <span id="btnCopiarTxt">Copiar</span>
+              </button>
+              <button type="button" class="btn btn--ghost btn--sm" id="btnImprimir">
+                <svg class="ico" aria-hidden="true"><use href="#i-print"/></svg>
+                Guardar PDF
+              </button>
+            </div>
+            <p class="res__nota">Una estimación, no una verdad absoluta. Abajo te explico qué hacer con ella.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════ Y AHORA QUÉ ══════════════════════════ -->
+<section class="section section--soft" id="despues">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Y ahora qué</p>
+      <h2>El número es el principio,<br><span class="accent">no el final</span></h2>
+      <p class="lead">
+        Una calculadora te da un punto de partida. Lo que decide tu resultado es lo que
+        haces las siguientes seis semanas con ese número.
+      </p>
+    </div>
+
+    <div class="pasos">
+      <article class="paso reveal">
+        <div class="paso__n">1</div>
+        <h3>Cómelo dos semanas</h3>
+        <p>
+          Sin cambiarlo cada tres días. Tu cuerpo necesita tiempo para responder y tú
+          necesitas datos suficientes para saber si funciona.
+        </p>
+      </article>
+      <article class="paso reveal">
+        <div class="paso__n">2</div>
+        <h3>Pésate bien</h3>
+        <p>
+          Cada mañana, en ayunas, después del baño. Lo que importa no es el número del
+          día: es la media de la semana comparada con la anterior.
+        </p>
+      </article>
+      <article class="paso reveal">
+        <div class="paso__n">3</div>
+        <h3>Ajusta con cabeza</h3>
+        <p>
+          ¿Dos semanas sin moverse la media? Quita o suma 150-200 kcal. Un ajuste
+          pequeño cada vez. Los saltos grandes solo te rompen la adherencia.
+        </p>
+      </article>
+      <article class="paso reveal">
+        <div class="paso__n">4</div>
+        <h3>Prioriza la proteína</h3>
+        <p>
+          Si un día no llegas a todo, llega a la proteína. Es lo que protege tu músculo
+          en déficit y lo que más te sacia. El resto es negociable.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ CÓMO SE CALCULA ══════════════════════════ -->
+<section class="section" id="metodo">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Sin caja negra</p>
+      <h2>Cómo se calcula<br><span class="accent">exactamente</span></h2>
+      <p class="lead">
+        Aquí tienes las fórmulas enteras. Si quieres, coge una calculadora y compruébalo:
+        te va a dar lo mismo.
+      </p>
+    </div>
+
+    <div class="formulas reveal">
+      <article class="formula">
+        <h3>1 · Metabolismo basal (TMB)</h3>
+        <code>Hombre
+<b>88,362</b> + (13,397 × peso) + (4,799 × altura) − (5,677 × edad)
+
+Mujer
+<b>447,593</b> + (9,247 × peso) + (3,098 × altura) − (4,330 × edad)</code>
+        <p>
+          Harris-Benedict en su versión revisada por Roza y Shizgal (1984), que corrige
+          la sobreestimación de la original de 1919. El peso va en kilos y la altura en
+          centímetros.
+        </p>
+      </article>
+
+      <article class="formula">
+        <h3>2 · Gasto total (mantenimiento)</h3>
+        <code>Gasto total = <b>TMB × factor de actividad</b>
+
+Sedentario   ×1,2
+Ligero       ×1,375
+Moderado     ×1,55
+Alto         ×1,725
+Muy alto     ×1,9</code>
+        <p>
+          El factor cubre todo lo que te mueves: entrenamiento, trabajo, paseos y hasta
+          gesticular. Es la parte donde más gente se pasa de optimista.
+        </p>
+      </article>
+
+      <article class="formula">
+        <h3>3 · Calorías objetivo</h3>
+        <code>Perder grasa   −10 % / −20 % / −25 %
+Mantener         igual que el gasto
+Ganar músculo  +5 % / +10 % / +15 %</code>
+        <p>
+          En porcentaje y no en calorías fijas, porque un déficit de 500 kcal no significa
+          lo mismo para quien gasta 1.900 que para quien gasta 3.400.
+        </p>
+      </article>
+
+      <article class="formula">
+        <h3>4 · Reparto de macros</h3>
+        <code>Proteína  2,2 g/kg en déficit
+          1,8 g/kg en mantenimiento
+          2,0 g/kg en superávit
+Grasa     25 % de las calorías
+          (mínimo 0,6 g/kg)
+Carbos    todo lo que queda</code>
+        <p>
+          La proteína se calcula sobre tu peso, no sobre las calorías: es lo que sostiene
+          el músculo. La grasa tiene suelo por salud hormonal. El carbohidrato es tu
+          gasolina para entrenar.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ MITOS ══════════════════════════ -->
+<section class="section section--soft">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Lo que no te cuentan</p>
+      <h2>Tres cosas que conviene<br><span class="accent">tener claras</span></h2>
+    </div>
+
+    <div class="myths reveal">
+      <div class="myth">
+        <span class="myth__n" aria-hidden="true"><svg><use href="#i-warn"/></svg></span>
+        <div>
+          <p><b>Ninguna fórmula acierta al 100 %.</b></p>
+          <p>
+            Harris-Benedict estima, no mide. El margen normal es de un 10 % arriba o abajo,
+            porque no conoce tu masa muscular, tu genética ni cuánto te mueves sin darte
+            cuenta. Es un punto de partida excelente y un dogma pésimo.
+          </p>
+        </div>
+      </div>
+      <div class="myth">
+        <span class="myth__n" aria-hidden="true"><svg><use href="#i-warn"/></svg></span>
+        <div>
+          <p><b>Más déficit no es más rápido.</b></p>
+          <p>
+            Pasarte de agresivo te hace perder músculo, dormir peor, entrenar flojo y
+            llegar al viernes con hambre de asalto a la nevera. Se pierde más grasa
+            comiendo algo más durante meses que muy poco durante tres semanas.
+          </p>
+        </div>
+      </div>
+      <div class="myth">
+        <span class="myth__n" aria-hidden="true"><svg><use href="#i-warn"/></svg></span>
+        <div>
+          <p><b>El peso de la báscula no es solo grasa.</b></p>
+          <p>
+            Agua, glucógeno, sal, la regla y lo que tengas por digerir mueven el número
+            varios kilos en días. Por eso se mira la media semanal y no el dato de ayer.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ DUDAS ══════════════════════════ -->
+<section class="section" id="faq">
+  <div class="wrap wrap--narrow">
+    <div class="section-head section-head--center reveal">
+      <p class="eyebrow">Dudas</p>
+      <h2>Lo que me preguntáis siempre</h2>
+    </div>
+
+    <div class="faq reveal">
+      <details class="faq__item">
+        <summary>¿Harris-Benedict o Mifflin-St Jeor?</summary>
+        <p>
+          Mifflin-St Jeor es algo más precisa en población general, sobre todo si hay
+          sobrepeso; Harris-Benedict es la clásica y la que usa casi todo el mundo. La
+          diferencia entre ambas suele ser de 50 a 150 kcal, así que menos de lo que
+          varía tu día a día. Tienes las dos en «Ajustes avanzados»: prueba y quédate con
+          la que quieras, pero luego no la cambies cada semana.
+        </p>
+      </details>
+      <details class="faq__item">
+        <summary>¿Tengo que pesar toda la comida para siempre?</summary>
+        <p>
+          No. Pesa las primeras dos o tres semanas para calibrar el ojo: casi nadie estima
+          bien las raciones al principio, y ahí es donde se escapan las calorías. Después
+          la mayoría de mis clientes lo llevan a ojo con controles puntuales.
+        </p>
+      </details>
+      <details class="faq__item">
+        <summary>Llevo semanas comiendo esto y no baja nada. ¿Qué pasa?</summary>
+        <p>
+          Casi siempre es una de tres: el factor de actividad elegido era demasiado
+          optimista, hay calorías sin contar (aceite, picoteos, bebidas, el fin de semana)
+          o el peso se mide mal. Revisa esas tres antes de tocar nada. Si están bien,
+          baja 150-200 kcal y dale otras dos semanas.
+        </p>
+      </details>
+      <details class="faq__item">
+        <summary>¿Sirve si estoy embarazada o tengo alguna patología?</summary>
+        <p>
+          No. Estas fórmulas están hechas para población adulta sana. En embarazo,
+          lactancia, trastornos de la conducta alimentaria, problemas de tiroides,
+          diabetes o cualquier condición médica, tus necesidades las tiene que marcar un
+          profesional sanitario que te conozca.
+        </p>
+      </details>
+      <details class="faq__item">
+        <summary>¿Puedo perder grasa y ganar músculo a la vez?</summary>
+        <p>
+          Sí, aunque no siempre y no eternamente. Funciona sobre todo si empiezas, si
+          vuelves después de un parón o si tienes bastante grasa que perder. Requiere
+          déficit suave, proteína alta y entrenamiento de fuerza bien planificado. En el
+          Método F90 lo hacemos a menudo, pero se decide caso por caso.
+        </p>
+      </details>
+      <details class="faq__item">
+        <summary>¿Guardáis mis datos?</summary>
+        <p>
+          No. El cálculo se hace entero en tu navegador y tus datos se quedan en tu
+          dispositivo para que no tengas que reescribirlos. No hay servidor, no hay
+          registro y no se envía nada a ningún sitio.
+        </p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ CTA FINAL ══════════════════════════ -->
+<section class="cta" id="contacto">
+  <div class="wrap wrap--narrow cta__inner reveal">
+    <p class="eyebrow">Tu turno</p>
+    <h2>Ya sabes el número.<br><span class="accent">Ahora falta el plan</span></h2>
+    <p class="cta__sub lead">
+      Escríbeme con tus resultados, cuéntame tu situación y te digo con honestidad si
+      puedo ayudarte o no. Sin compromiso y sin venderte humo.
+    </p>
+    <a class="btn btn--primary btn--wide js-cta" href="#">
+      Hablar con Álvaro <svg class="ico ico--arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
+    </a>
+    <p class="cta__small">Respondo yo personalmente, no un bot.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════════════════════ PIE ══════════════════════════ -->
+<footer class="foot">
+  <div class="wrap foot__inner">
+    <div>
+      <a class="logo" href="#top" aria-label="Método F90">
+        <picture>
+          <source srcset="assets/img/logo-f90-mark.webp" type="image/webp">
+          <img src="assets/img/logo-f90-mark.png" alt="Método F90" width="34" height="34">
+        </picture>
+      </a>
+      <p class="foot__tag">Transformación física real. Método F90.</p>
+    </div>
+    <nav class="foot__links" aria-label="Enlaces">
+      <a href="#calculadora">Calculadora</a>
+      <a href="#metodo">Cómo se calcula</a>
+      <a href="#faq">Dudas</a>
+      <a id="footCambios" href="https://transformaciones.alvarocobos.com">Cambios reales</a>
+      <a id="footIg" href="#" target="_blank" rel="noopener">Instagram</a>
+    </nav>
+  </div>
+  <div class="wrap">
+    <p class="foot__legal">
+      Esta calculadora ofrece una <b>estimación orientativa</b> basada en fórmulas
+      poblacionales (Harris-Benedict revisada y Mifflin-St Jeor). No es un consejo médico
+      ni nutricional individualizado, no sustituye la valoración de un profesional
+      sanitario y no debe usarse durante el embarazo o la lactancia, en menores de edad,
+      ni en personas con patologías o antecedentes de trastornos de la conducta
+      alimentaria. Ante cualquier duda, consulta con tu médico o con un dietista-nutricionista.
+    </p>
+    <p class="foot__copy">© <span id="year"></span> Álvaro Cobos · Método F90</p>
+  </div>
+</footer>
+
+<!-- Botón flotante de WhatsApp -->
+<a class="wa js-cta" href="#" aria-label="Escribir a Álvaro por WhatsApp">
+  <span class="wa__onda" aria-hidden="true"></span>
+  <span class="wa__onda wa__onda--2" aria-hidden="true"></span>
+  <span class="wa__nucleo" aria-hidden="true"><svg><use href="#i-whatsapp"/></svg></span>
+  <span class="wa__globo" aria-hidden="true">Habla conmigo</span>
+</a>
+
+<script src="assets/config.js"></script>
+<script src="assets/js/calculadora.js"></script>
+</body>
+</html>
