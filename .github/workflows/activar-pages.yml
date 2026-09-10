@@ -1,0 +1,62 @@
+# ============================================================================
+# Activar GitHub Pages — de un solo uso
+# ----------------------------------------------------------------------------
+# Este workflow existe para una única cosa: encender GitHub Pages sirviendo la
+# rama `main` desde la raíz, que es lo mismo que se hace a mano en
+# Settings › Pages. En cuanto haya funcionado se borra: la web no lo necesita
+# para nada, se publica sola con cada push a `main`.
+# ============================================================================
+name: Activar Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/activar-pages.yml']
+
+permissions:
+  contents: read
+  pages: write
+
+jobs:
+  activar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Encender Pages en main / raíz
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -u
+          api="https://api.github.com/repos/$REPO/pages"
+          cabeceras=(-H "Accept: application/vnd.github+json"
+                     -H "Authorization: Bearer $GH_TOKEN"
+                     -H "X-GitHub-Api-Version: 2022-11-28")
+          cuerpo='{"source":{"branch":"main","path":"/"}}'
+
+          echo "── Intentando crear el sitio de Pages ──"
+          codigo=$(curl -sS -o /tmp/salida.json -w '%{http_code}' \
+                   -X POST "${cabeceras[@]}" "$api" -d "$cuerpo")
+          echo "HTTP $codigo"; cat /tmp/salida.json; echo
+
+          # 409 = el sitio ya existía: entonces solo hay que fijarle el origen.
+          if [ "$codigo" = "409" ]; then
+            echo "── Ya existía; fijando el origen a main / raíz ──"
+            codigo=$(curl -sS -o /tmp/salida.json -w '%{http_code}' \
+                     -X PUT "${cabeceras[@]}" "$api" -d "$cuerpo")
+            echo "HTTP $codigo"; cat /tmp/salida.json; echo
+          fi
+
+          case "$codigo" in
+            201|204) echo "✔ Pages activado" ;;
+            *) echo "✘ No se pudo activar (HTTP $codigo)"; exit 1 ;;
+          esac
+
+      - name: Comprobar cómo ha quedado
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          curl -sS -H "Accept: application/vnd.github+json" \
+               -H "Authorization: Bearer $GH_TOKEN" \
+               "https://api.github.com/repos/$REPO/pages"
