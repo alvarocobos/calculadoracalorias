@@ -37,7 +37,7 @@ Con esto ya funciona. Si te vale esa dirección, has terminado.
 
 ---
 
-## Paso 2 — El subdominio (opcional)
+## Paso 2 — El subdominio
 
 Lo natural, siguiendo lo que ya tienes, sería:
 
@@ -45,11 +45,14 @@ Lo natural, siguiendo lo que ya tienes, sería:
 https://calculadora.alvarocobos.com
 ```
 
-**Ojo con el orden. Primero el DNS y después el archivo.** Si creas el archivo
-`CNAME` antes de que exista el registro DNS, GitHub empieza a responder en un
+**El orden importa: primero el DNS y después el archivo.** Si el archivo
+`CNAME` existe antes que el registro DNS, GitHub empieza a responder en un
 dominio que no resuelve y la página deja de verse también en la dirección
-`.github.io`. Por eso este repositorio **no** trae el archivo `CNAME` hecho:
-lo creas tú cuando el DNS esté listo.
+`.github.io`.
+
+El registro DNS **ya está creado en Hostinger**, así que el archivo `CNAME` ya
+está en la raíz de este repositorio con el dominio dentro. Los dos pasos de
+abajo quedan documentados por si algún día cambias de dominio.
 
 ### 2.1 · El registro DNS, en Hostinger
 
@@ -75,17 +78,18 @@ dig +short calculadora.alvarocobos.com
 # tiene que responder alvarocobos.github.io (o una IP de GitHub)
 ```
 
-### 2.3 · El archivo CNAME
+### 2.3 · El archivo CNAME — hecho
 
-Cuando el comando de arriba responda, crea en la raíz del repositorio un
-archivo llamado `CNAME` (sin extensión) con una sola línea:
+En la raíz del repositorio hay un archivo llamado `CNAME` (sin extensión) con
+una sola línea:
 
 ```
 calculadora.alvarocobos.com
 ```
 
-Súbelo a `main`. En Settings › Pages, el campo **Custom domain** se rellenará
-solo al leerlo.
+En Settings › Pages, el campo **Custom domain** se rellena solo al leerlo.
+Si algún día cambias de dominio, edita este archivo y el registro DNS: son las
+dos únicas piezas.
 
 ### 2.4 · HTTPS
 
