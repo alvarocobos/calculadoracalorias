@@ -43,6 +43,7 @@
   <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></symbol>
   <symbol id="i-man" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="6"/><path d="M14.5 9.5 21 3M16 3h5v5"/></symbol>
   <symbol id="i-woman" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M12 15v7M9 19h6"/></symbol>
+  <symbol id="i-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
   <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></symbol>
   <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.465 3.488"/></symbol>
@@ -80,9 +81,10 @@
     </h1>
 
     <p class="hero__sub lead entra" style="--d:.5s">
-      Calcula tu metabolismo basal, tu gasto real y las calorías exactas para tu objetivo
-      con la fórmula <strong>Harris-Benedict</strong>. Te doy también el reparto de
-      proteína, carbohidrato y grasa, que es lo que de verdad marca la diferencia.
+      Con la fórmula <strong>Harris-Benedict</strong>, tu metabolismo basal, tu gasto real
+      y la horquilla de calorías y macros de tu objetivo. Una horquilla y no una cifra
+      clavada, <strong>porque nadie puede darte una cifra clavada</strong> y quien te la
+      da te está vendiendo una precisión que no existe.
     </p>
 
     <p class="hero__note entra" style="--d:.68s">Tus datos no salen de tu móvil</p>
@@ -312,12 +314,20 @@
         <div class="res">
 
           <div class="res__hero">
-            <span class="res__lbl" id="resLbl">Comer al día</span>
-            <strong class="res__big" id="resKcal">0</strong>
+            <span class="res__lbl" id="resLbl">Para perder grasa</span>
+            <strong class="res__big">
+              <span id="resMin">0</span><i class="res__sep" aria-hidden="true">–</i><span id="resMax">0</span>
+            </strong>
             <span class="res__u">kilocalorías al día</span>
-            <p class="res__delta" id="resDelta" style="margin:15px 0 0">
+            <p class="res__delta" id="resDelta">
               <svg aria-hidden="true"><use href="#i-down"/></svg>
               <span id="resDeltaTxt"></span>
+            </p>
+            <p class="res__porque">
+              Es una horquilla y no una cifra clavada, y es a propósito:
+              <strong>el factor de actividad lo eliges tú a ojo</strong> y ahí está
+              casi todo el error. Empieza por el punto medio y deja que la báscula
+              te diga hacia qué lado moverte.
             </p>
           </div>
 
@@ -327,7 +337,7 @@
                 Metabolismo basal
                 <span class="tip">
                   <button type="button" class="tip__btn" aria-label="Qué es el metabolismo basal">?</button>
-                  <span class="tip__txt" role="tooltip">Lo que tu cuerpo quema en reposo absoluto, solo por estar vivo. Nunca deberías comer por debajo de esta cifra.</span>
+                  <span class="tip__txt" role="tooltip">Lo que tu cuerpo quema en reposo absoluto. Es la única parte que la fórmula calcula sola, sin que nadie opine: por eso va sin horquilla.</span>
                 </span>
               </span>
               <strong class="mini__v" id="resTmb">0<i>kcal</i></strong>
@@ -337,15 +347,16 @@
                 Mantenimiento
                 <span class="tip">
                   <button type="button" class="tip__btn" aria-label="Qué es el mantenimiento">?</button>
-                  <span class="tip__txt" role="tooltip">Tu gasto total del día, con la actividad incluida. Comiendo esto, tu peso se queda como está.</span>
+                  <span class="tip__txt" role="tooltip">Tu gasto del día con la actividad incluida. Aquí ya entra tu estimación de cuánto te mueves, así que deja de ser un número y pasa a ser un rango.</span>
                 </span>
               </span>
-              <strong class="mini__v" id="resTdee">0<i>kcal</i></strong>
+              <strong class="mini__v mini__v--rango" id="resTdee">0</strong>
             </div>
           </div>
 
           <div class="macros__h">
             <h3>Tus macros</h3>
+            <span class="macros__nota">gramos al día</span>
           </div>
           <div class="barra" id="barra" aria-hidden="true">
             <i class="b-pro" id="barPro" style="width:30%"></i>
@@ -356,20 +367,17 @@
             <li class="macro macro--pro">
               <span class="macro__c" aria-hidden="true"></span>
               <span class="macro__n">Proteína</span>
-              <span class="macro__k" id="kcalPro">0 kcal</span>
-              <strong class="macro__g" id="gPro">0<i>g</i></strong>
+              <strong class="macro__g" id="gPro">0</strong>
             </li>
             <li class="macro macro--car">
               <span class="macro__c" aria-hidden="true"></span>
               <span class="macro__n">Carbohidratos</span>
-              <span class="macro__k" id="kcalCar">0 kcal</span>
-              <strong class="macro__g" id="gCar">0<i>g</i></strong>
+              <strong class="macro__g" id="gCar">0</strong>
             </li>
             <li class="macro macro--gra">
               <span class="macro__c" aria-hidden="true"></span>
               <span class="macro__n">Grasas</span>
-              <span class="macro__k" id="kcalGra">0 kcal</span>
-              <strong class="macro__g" id="gGra">0<i>g</i></strong>
+              <strong class="macro__g" id="gGra">0</strong>
             </li>
           </ul>
 
@@ -384,8 +392,8 @@
             <div class="extra">
               <span class="extra__i"><svg aria-hidden="true"><use href="#i-speed"/></svg></span>
               <span class="extra__t">
-                <span class="extra__l">Ritmo</span>
-                <strong class="extra__v" id="resRitmo">0<small>kg/sem</small></strong>
+                <span class="extra__l" id="resRitmoLbl">Ritmo</span>
+                <strong class="extra__v extra__v--rango" id="resRitmo">0<small>kg/sem</small></strong>
               </span>
             </div>
             <div class="extra">
@@ -403,10 +411,85 @@
             <span id="sueloTxt"></span>
           </div>
 
+          <!-- ── Las seis preguntas ────────────────────────────────────── -->
+          <div class="fiar">
+            <div class="fiar__h">
+              <h3>¿Cuánto te puedes fiar de esta horquilla?</h3>
+              <p>
+                Seis preguntas honestas. Marca las que te pasen: no cambian el
+                cálculo, cambian lo que tienes que hacer con él.
+              </p>
+            </div>
+
+            <ul class="fiar__lista" id="fiarLista">
+              <li><label class="chk">
+                <input type="checkbox" data-q="dieta">
+                <span class="chk__box" aria-hidden="true"><svg><use href="#i-tick"/></svg></span>
+                <span class="chk__txt">
+                  <b>He pasado varios meses a dieta baja en calorías este último año</b>
+                  <small>Después de una temporada larga en déficit, el gasto real baja y tarda en volver. Ninguna fórmula sabe eso de ti.</small>
+                </span>
+              </label></li>
+
+              <li><label class="chk">
+                <input type="checkbox" data-q="ojo">
+                <span class="chk__box" aria-hidden="true"><svg><use href="#i-tick"/></svg></span>
+                <span class="chk__txt">
+                  <b>Calculo las raciones a ojo, sin pesar nada</b>
+                  <small>Al estimar comida se falla de media entre un 20 y un 30 %. Eso es más grande que todo el déficit que acabas de calcular.</small>
+                </span>
+              </label></li>
+
+              <li><label class="chk">
+                <input type="checkbox" data-q="fuerza">
+                <span class="chk__box" aria-hidden="true"><svg><use href="#i-tick"/></svg></span>
+                <span class="chk__txt">
+                  <b>Entreno fuerza menos de dos días por semana</b>
+                  <small>Sin ese estímulo, buena parte de lo que pierdas será músculo. Y cuanto menos músculo, menos gastas: el número se mueve solo hacia abajo.</small>
+                </span>
+              </label></li>
+
+              <li><label class="chk">
+                <input type="checkbox" data-q="finde">
+                <span class="chk__box" aria-hidden="true"><svg><use href="#i-tick"/></svg></span>
+                <span class="chk__txt">
+                  <b>Mi fin de semana no se parece en nada a mi semana</b>
+                  <small>Puedes clavarlo de lunes a viernes y que la media de los siete días no cuadre igualmente. Se come en semanas, no en días.</small>
+                </span>
+              </label></li>
+
+              <li><label class="chk">
+                <input type="checkbox" data-q="salud">
+                <span class="chk__box" aria-hidden="true"><svg><use href="#i-tick"/></svg></span>
+                <span class="chk__txt">
+                  <b>Tomo medicación o tengo alguna condición (tiroides, SOP, diabetes…)</b>
+                  <small>Cambia tus necesidades y cómo responde tu cuerpo. Esto no lo contempla la fórmula y lo tiene que ver un profesional sanitario.</small>
+                </span>
+              </label></li>
+
+              <li><label class="chk">
+                <input type="checkbox" data-q="aplicar">
+                <span class="chk__box" aria-hidden="true"><svg><use href="#i-tick"/></svg></span>
+                <span class="chk__txt">
+                  <b>No sabría montarme un día entero de comidas con estos gramos</b>
+                  <small>Este es el grande. El número puede estar perfecto y no servirte de nada, porque nadie come «proteína»: se come pollo, arroz y aceite.</small>
+                </span>
+              </label></li>
+            </ul>
+
+            <div class="veredicto" id="veredicto">
+              <div class="veredicto__cab">
+                <span class="veredicto__pin" id="veredictoPin">0/6</span>
+                <strong id="veredictoTit">Sin marcar nada</strong>
+              </div>
+              <p id="veredictoTxt"></p>
+            </div>
+          </div>
+
           <div class="res__cta">
             <a class="btn btn--primary js-cta-res" href="#" id="ctaRes">
               <svg class="ico" aria-hidden="true"><use href="#i-whatsapp"/></svg>
-              Que Álvaro revise mis números
+              <span id="ctaResTxt">Que Álvaro me lo convierta en un plan</span>
             </a>
             <div class="res__acciones">
               <button type="button" class="btn btn--ghost btn--sm" id="btnCopiar">
@@ -418,7 +501,7 @@
                 Guardar PDF
               </button>
             </div>
-            <p class="res__nota">Una estimación, no una verdad absoluta. Abajo te explico qué hacer con ella.</p>
+            <p class="res__nota">Te llevas la horquilla y tus respuestas. Respondo yo, no un bot.</p>
           </div>
 
         </div>
@@ -428,52 +511,61 @@
   </div>
 </section>
 
-<!-- ══════════════════════════ Y AHORA QUÉ ══════════════════════════ -->
+<!-- ══════════════════════════ LAS PREGUNTAS ══════════════════════════ -->
 <section class="section section--soft" id="despues">
   <div class="wrap">
     <div class="section-head reveal">
       <p class="eyebrow">Y ahora qué</p>
-      <h2>El número es el principio,<br><span class="accent">no el final</span></h2>
+      <h2>Ya tienes el número.<br><span class="accent">Ahora vienen las preguntas</span></h2>
       <p class="lead">
-        Una calculadora te da un punto de partida. Lo que decide tu resultado es lo que
-        haces las siguientes seis semanas con ese número.
+        Esto es lo que nadie te cuenta cuando te da una cifra: la parte difícil
+        no era calcularla. Estas cuatro llegan siempre, y llegan en este orden.
       </p>
     </div>
 
     <div class="pasos">
       <article class="paso reveal">
         <div class="paso__n">1</div>
-        <h3>Cómelo dos semanas</h3>
+        <h3>¿Por dónde empiezo dentro de la horquilla?</h3>
         <p>
-          Sin cambiarlo cada tres días. Tu cuerpo necesita tiempo para responder y tú
-          necesitas datos suficientes para saber si funciona.
+          Por el punto medio, y dos semanas sin tocarlo. Pero «dos semanas sin
+          tocarlo» es justo lo que casi nadie aguanta cuando la báscula sube un
+          martes por retener agua.
         </p>
       </article>
       <article class="paso reveal">
         <div class="paso__n">2</div>
-        <h3>Pésate bien</h3>
+        <h3>¿Y esto qué es en comida?</h3>
         <p>
-          Cada mañana, en ayunas, después del baño. Lo que importa no es el número del
-          día: es la media de la semana comparada con la anterior.
+          Nadie come «180 gramos de proteína»: se come pollo, huevos, yogur y
+          pan. Traducir la cifra a desayunos, comidas y cenas que además te
+          gusten y te quepan en el día es un trabajo aparte.
         </p>
       </article>
       <article class="paso reveal">
         <div class="paso__n">3</div>
-        <h3>Ajusta con cabeza</h3>
+        <h3>¿Cómo sé si está funcionando?</h3>
         <p>
-          ¿Dos semanas sin moverse la media? Quita o suma 150-200 kcal. Un ajuste
-          pequeño cada vez. Los saltos grandes solo te rompen la adherencia.
+          No por el peso de hoy. Por la media de la semana contra la anterior, y
+          sabiendo distinguir grasa de agua, glucógeno, sal o la regla. El dato
+          suelto engaña casi siempre.
         </p>
       </article>
       <article class="paso reveal">
         <div class="paso__n">4</div>
-        <h3>Prioriza la proteína</h3>
+        <h3>¿Y cuando se pare?</h3>
         <p>
-          Si un día no llegas a todo, llega a la proteína. Es lo que protege tu músculo
-          en déficit y lo que más te sacia. El resto es negociable.
+          Porque se va a parar. Ahí es donde se decide todo: si tocar calorías,
+          si tocar actividad, si no tocar nada todavía. Elegir mal una sola vez
+          te cuesta un mes.
         </p>
       </article>
     </div>
+
+    <p class="quote reveal" style="margin-top:clamp(30px,4vw,44px);margin-bottom:0">
+      Una calculadora te da el punto de partida. Lo que decide tu resultado es
+      lo que haces con él las siguientes doce semanas.
+    </p>
   </div>
 </section>
 
@@ -531,7 +623,22 @@ Ganar músculo  +5 % / +10 % / +15 %</code>
       </article>
 
       <article class="formula">
-        <h3>4 · Reparto de macros</h3>
+        <h3>4 · De dónde sale la horquilla</h3>
+        <code>Factor elegido      1,55  (moderado)
+Medio escalón       ± 0,0875
+Franja real         1,46 – 1,64
+
+Horquilla = TMB × esa franja ± objetivo</code>
+        <p>
+          El basal lo calcula la fórmula sin que nadie opine. El error entra al elegir
+          el factor de actividad, que lo marcas tú a ojo: quien dice «moderado» puede
+          estar en cualquier punto entre «ligero» y «alto». Así que movemos medio escalón
+          de la escala arriba y abajo y te damos la franja que sale de verdad.
+        </p>
+      </article>
+
+      <article class="formula">
+        <h3>5 · Reparto de macros</h3>
         <code>Proteína  2,2 g/kg en déficit
           1,8 g/kg en mantenimiento
           2,0 g/kg en superávit
@@ -603,6 +710,23 @@ Carbos    todo lo que queda</code>
 
     <div class="faq reveal">
       <details class="faq__item">
+        <summary>¿Por qué me das un rango y no un número exacto?</summary>
+        <p>
+          Porque el número exacto no existe y dártelo sería mentirte. Estas fórmulas
+          se sacaron midiendo a cientos de personas y quedándose con la media: sobre
+          una persona concreta aciertan con un margen de alrededor del 10 %. Encima,
+          el factor de actividad lo eliges tú a ojo, y ahí casi todo el mundo se pasa
+          de optimista.
+        </p>
+        <p>
+          Una cifra clavada da sensación de certeza y hace que te obsesiones con
+          cuadrar unas calorías que ya venían con error de fábrica. Una horquilla te
+          dice la verdad: empieza por el medio, mira qué hace tu peso durante dos
+          semanas y muévete hacia el lado que toque. El dato que manda es el tuyo,
+          no el de la fórmula.
+        </p>
+      </details>
+      <details class="faq__item">
         <summary>¿Harris-Benedict o Mifflin-St Jeor?</summary>
         <p>
           Mifflin-St Jeor es algo más precisa en población general, sobre todo si hay
@@ -665,8 +789,9 @@ Carbos    todo lo que queda</code>
     <p class="eyebrow">Tu turno</p>
     <h2>Ya sabes el número.<br><span class="accent">Ahora falta el plan</span></h2>
     <p class="cta__sub lead">
-      Escríbeme con tus resultados, cuéntame tu situación y te digo con honestidad si
-      puedo ayudarte o no. Sin compromiso y sin venderte humo.
+      La calculadora hace la parte fácil. Escríbeme con tu horquilla y con lo que hayas
+      marcado en las seis preguntas, y te digo con honestidad si puedo ayudarte o no.
+      Sin compromiso y sin venderte humo.
     </p>
     <a class="btn btn--primary btn--wide js-cta" href="#">
       Hablar con Álvaro <svg class="ico ico--arrow" aria-hidden="true"><use href="#i-arrow"/></svg>

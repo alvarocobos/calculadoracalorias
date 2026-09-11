@@ -55,6 +55,21 @@ const CONFIG = {
     sueloSobreTMB: 1.0,
 
     // Mililitros de agua por kilo de peso corporal.
-    aguaPorKg: 35
+    aguaPorKg: 35,
+
+    /* ── La horquilla ────────────────────────────────────────────────────
+       La calculadora no da una cifra exacta, da un rango. No es un adorno:
+       el factor de actividad se elige a ojo y ahí está el error de verdad.
+       Quien marca «moderado» puede estar en cualquier punto entre «ligero»
+       y «alto», así que la horquilla se calcula moviendo medio escalón de
+       la escala arriba y abajo. Es la incertidumbre real, no un ±X inventado.
+
+       `pasoActividad` es la separación entre dos opciones de la escala
+       (1,375 → 1,55 → 1,725). Súbelo para dar rangos más amplios y
+       prudentes; bájalo para afinar más. A cero, vuelve a dar cifra exacta. */
+    pasoActividad: 0.175,
+
+    // A cuánto se redondean los extremos de la horquilla de calorías.
+    redondeo: 50
   }
 };

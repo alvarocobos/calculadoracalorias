@@ -12,6 +12,13 @@ Las tres páginas se ven como la misma web.
 El cálculo entero ocurre en el navegador de quien la usa. No hay servidor,
 no hay registro y no se envía ni un dato a ningún sitio.
 
+**No da una cifra exacta: da una horquilla.** Es la decisión de producto más
+importante de la página y también la más honesta. Una fórmula poblacional
+acierta con un margen de alrededor del 10 %, y encima el factor de actividad
+lo elige la persona a ojo. Dar «2.360 kcal» clavadas es vender una precisión
+que no existe. La horquilla dice la verdad, y las seis preguntas del final
+enseñan lo que a ese número todavía le falta para convertirse en un plan.
+
 ---
 
 ## 1. Poner tus datos (2 minutos)
@@ -40,11 +47,24 @@ instante (sin pulsar ningún botón):
 
 | Dato | Qué es |
 |---|---|
-| **Calorías objetivo** | La cifra grande: lo que tiene que comer al día |
-| **Metabolismo basal** | Lo que quema en reposo absoluto |
-| **Mantenimiento** | Su gasto total del día, con la actividad incluida |
-| **Macros** | Proteína, carbohidratos y grasas, en gramos y en kcal |
-| **Agua, ritmo estimado e IMC** | Los tres extras de abajo |
+| **Horquilla de calorías** | La cifra grande: la franja en la que empezar |
+| **Metabolismo basal** | Lo que quema en reposo. Va sin horquilla: es la única parte que la fórmula calcula sin que nadie opine |
+| **Mantenimiento** | Su gasto del día. Aquí ya entra su estimación de actividad, así que pasa a ser un rango |
+| **Macros** | Proteína, carbohidratos y grasas, también en horquilla |
+| **Agua, ritmo e IMC** | Los tres extras de abajo |
+| **Las seis preguntas** | Lo que decide si ese número le sirve o no |
+
+### Las seis preguntas
+
+Debajo del resultado hay seis casillas que la persona se marca a sí misma:
+historial de dietas, si pesa la comida o va a ojo, si entrena fuerza, si el
+fin de semana se le va, si toma medicación y si sabría montar un día de
+comidas con esos gramos.
+
+No tocan el cálculo. Lo que hacen es dos cosas: que quien lee se dé cuenta de
+todo lo que un número no puede resolver, y que **cuando te escriba por WhatsApp
+ya te llegue su situación contada por ella misma**, sin que tengas que
+preguntársela. El mensaje sale con la horquilla y con lo que haya marcado.
 
 Además puede **copiar** el resultado, **guardarlo en PDF** (imprimir) o mandártelo
 por WhatsApp con un solo botón: el mensaje ya va escrito con todos sus números.
@@ -75,6 +95,13 @@ Mujer   (10 × kg) + (6,25 × cm) − (5 × edad) − 161
 **Gasto total** = TMB × factor de actividad (1,2 · 1,375 · 1,55 · 1,725 · 1,9).
 
 **Calorías objetivo** = gasto total ± el porcentaje del objetivo y el ritmo.
+
+**La horquilla** no es un ±X inventado. El basal sale de la fórmula sin margen
+de opinión; el error entra al elegir el factor de actividad, que lo marca la
+persona a ojo. Así que se mueve **medio escalón de la escala** arriba y abajo
+(de 1,55 a la franja 1,46–1,64) y se da el rango que sale de ahí. Es la
+incertidumbre real del método. En `CONFIG.ajustes.pasoActividad` se puede
+ensanchar, estrechar o poner a cero para volver a dar cifra exacta.
 
 **Macros**: la proteína se ancla al peso corporal, la grasa es un 25 % de las
 calorías con un mínimo de 0,6 g/kg, y el carbohidrato se queda con lo que sobra.

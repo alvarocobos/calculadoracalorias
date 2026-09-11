@@ -393,10 +393,22 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 8px)}
   text-transform:uppercase;color:var(--accent-2);margin-bottom:10px;
 }
 .res__big{
-  display:block;font-size:clamp(56px,13vw,86px);font-weight:700;
-  letter-spacing:-.05em;line-height:.96;color:var(--text);
+  display:flex;align-items:baseline;justify-content:center;gap:.1em;flex-wrap:nowrap;
+  font-size:clamp(40px,9.2vw,64px);font-weight:700;
+  letter-spacing:-.05em;line-height:1;color:var(--text);
   font-variant-numeric:tabular-nums;
 }
+.res__sep{
+  font-style:normal;font-weight:400;color:var(--text-3);
+  font-size:.62em;letter-spacing:0;padding-inline:.06em;
+}
+/* El «por qué» de la horquilla: es la pieza honesta de toda la página, así
+   que va justo debajo de la cifra y no escondida en una ayuda emergente. */
+.res__porque{
+  max-width:46ch;margin:16px auto 0;
+  color:var(--text-3);font-size:13px;line-height:1.6;
+}
+.res__porque strong{color:var(--text-2);font-weight:600}
 .res__u{
   display:block;font-size:12px;font-weight:600;letter-spacing:.2em;
   text-transform:uppercase;color:var(--text-3);margin-top:9px;
@@ -427,6 +439,8 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 8px)}
 }
 .mini__v i{font-style:normal;font-size:12px;font-weight:600;color:var(--text-3);
   letter-spacing:0;margin-left:3px}
+.mini__v--rango{font-size:clamp(17px,2.6vw,21px);white-space:nowrap}
+.mini__v--rango i{font-weight:400;font-size:.8em;margin:0;padding-inline:.1em}
 
 /* Ayuda emergente */
 .tip{position:relative;display:inline-flex;flex:none}
@@ -475,13 +489,20 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 8px)}
 .macro--car .macro__c{background:var(--m-car)}
 .macro--gra .macro__c{background:var(--m-gra)}
 .macro__n{color:var(--text);font-size:14.5px;font-weight:600;letter-spacing:-.012em}
-.macro__k{color:var(--text-3);font-size:12px;margin-left:auto;
-  font-variant-numeric:tabular-nums;white-space:nowrap}
 .macro__g{
-  flex:none;color:var(--text);font-size:17px;font-weight:600;letter-spacing:-.028em;
-  font-variant-numeric:tabular-nums;min-width:64px;text-align:right;
+  flex:none;margin-left:auto;
+  color:var(--text);font-size:17px;font-weight:600;letter-spacing:-.028em;
+  font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;
 }
-.macro__g i{font-style:normal;font-size:12px;color:var(--text-3);margin-left:2px}
+.macro__g i{font-style:normal;font-weight:400;color:var(--text-3);
+  font-size:.78em;letter-spacing:0;padding-inline:.12em}
+/* El <u> se usa como envoltorio de la unidad («kcal», «g»), no para subrayar:
+   se le quita la raya en todo el panel de resultado. */
+.res u{text-decoration:none;font-size:.7em;color:var(--text-3);
+  font-weight:600;margin-left:3px}
+.macro__g u{font-size:12px}
+
+.macros__nota{font-size:11px;font-weight:500;color:var(--text-3);letter-spacing:0}
 
 /* ── Extras (agua, IMC) ──────────────────────────────────────────────────── */
 .extras{display:grid;grid-template-columns:repeat(auto-fit,minmax(146px,1fr));gap:10px;margin-top:22px}
@@ -503,6 +524,8 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 8px)}
 .extra__v{display:block;color:var(--text);font-size:15.5px;font-weight:600;
   letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .extra__v small{font-size:11.5px;font-weight:500;color:var(--text-3);margin-left:3px}
+.extra__v--rango i{font-style:normal;font-weight:400;color:var(--text-3);
+  font-size:.8em;padding-inline:.06em}
 /* Categoría del IMC: debajo, y ahí sí puede partir si hace falta. */
 .extra__n{display:block;font-size:11.5px;color:var(--text-3);line-height:1.35;margin-top:1px}
 
@@ -515,6 +538,72 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 8px)}
 }
 .suelo svg{width:17px;height:17px;flex:none;margin-top:2px;color:var(--accent-2)}
 .suelo b{color:var(--text)}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LAS SEIS PREGUNTAS
+   ══════════════════════════════════════════════════════════════════════════ */
+.fiar{margin-top:26px;padding-top:24px;border-top:1px solid var(--line)}
+.fiar__h{margin-bottom:16px}
+.fiar__h h3{font-size:17px;letter-spacing:-.022em;margin-bottom:.45em}
+.fiar__h p{margin:0;color:var(--text-3);font-size:13.5px;line-height:1.55}
+
+.fiar__lista{display:grid;gap:7px}
+
+/* Casilla: la fila entera es pulsable, con la marca colocada en el hueco
+   que le deja el relleno izquierdo. */
+.chk{
+  position:relative;display:block;cursor:pointer;
+  padding:14px 17px 14px 48px;border-radius:var(--r-md);
+  background:rgba(255,255,255,.025);border:1px solid var(--line);
+  transition:background var(--fast),border-color var(--fast);
+}
+.chk:hover{border-color:var(--line-2);background:rgba(255,255,255,.045)}
+.chk input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0}
+
+.chk__box{
+  position:absolute;left:16px;top:15px;
+  width:21px;height:21px;border-radius:7px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line-3);
+  display:grid;place-items:center;color:var(--ink);
+  transition:background var(--fast),border-color var(--fast);
+}
+.chk__box svg{width:12px;height:12px;opacity:0;transform:scale(.6);
+  transition:opacity var(--fast),transform var(--fast)}
+
+.chk__txt{display:flex;flex-direction:column;gap:3px;min-width:0}
+.chk b{color:var(--text-2);font-size:14px;font-weight:600;
+  letter-spacing:-.012em;line-height:1.4;transition:color var(--fast)}
+.chk small{color:var(--text-3);font-size:12.5px;line-height:1.5}
+
+.chk input:checked ~ .chk__box{background:var(--accent);border-color:var(--accent)}
+.chk input:checked ~ .chk__box svg{opacity:1;transform:none}
+.chk input:checked ~ .chk__txt b{color:var(--text)}
+.chk input:checked{background:transparent}
+.chk input:focus-visible ~ .chk__box{outline:2px solid var(--accent);outline-offset:2px}
+/* El realce de la fila marcada es un extra: donde no haya :has(), la casilla
+   naranja ya deja claro lo que está marcado. */
+.chk:has(input:checked){background:var(--accent-08);border-color:var(--accent-22)}
+
+/* ── El veredicto ────────────────────────────────────────────────────────── */
+.veredicto{
+  margin-top:14px;padding:17px 19px;border-radius:var(--r-md);
+  background:var(--surface-2);border:1px solid var(--line-2);
+  transition:border-color var(--mid),background var(--mid);
+}
+.veredicto--ojo{background:var(--accent-08);border-color:var(--accent-22)}
+.veredicto__cab{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+.veredicto__pin{
+  flex:none;min-width:42px;padding:4px 9px;border-radius:7px;text-align:center;
+  background:rgba(255,255,255,.06);border:1px solid var(--line-2);
+  color:var(--text-2);font-size:12px;font-weight:600;
+  font-variant-numeric:tabular-nums;transition:all var(--fast);
+}
+.veredicto--ojo .veredicto__pin{background:var(--accent-14);
+  border-color:var(--accent-45);color:var(--accent-2)}
+.veredicto__cab strong{color:var(--text);font-size:15px;letter-spacing:-.018em;line-height:1.35}
+.veredicto p{margin:0;color:var(--text-2);font-size:13.5px;line-height:1.6}
+.veredicto p + p{margin-top:.6em}
+.veredicto b{color:var(--text)}
 
 /* ── Acciones del resultado ──────────────────────────────────────────────── */
 .res__cta{margin-top:24px;padding-top:22px;border-top:1px solid var(--line)}

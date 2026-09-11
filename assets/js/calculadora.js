@@ -95,62 +95,97 @@
     return p[objetivo] || 1.8;
   }
 
+  /* Redondea a la unidad que diga la configuración (50 kcal por defecto). */
+  function aRedondo(v, paso) {
+    paso = paso || AJ.redondeo || 50;
+    return Math.round(v / paso) * paso;
+  }
+
   function calcular(d) {
-    var tmb  = calcularTMB(d.formula, d.sexo, d.peso, d.altura, d.edad);
-    var tdee = tmb * d.actividad;
-    var pct  = porcentaje(d.objetivo, d.ritmo);
+    var tmb = calcularTMB(d.formula, d.sexo, d.peso, d.altura, d.edad);
+    var pct = porcentaje(d.objetivo, d.ritmo);
 
-    // Objetivo, redondeado a la decena para que sea un número manejable.
-    // Si no hay ajuste (mantener), el objetivo es exactamente el gasto: así la
-    // cifra grande y el «mantenimiento» de al lado no se contradicen por 4 kcal.
-    var objetivo = pct === 0
-      ? Math.round(tdee)
-      : Math.round((tdee * (1 + pct / 100)) / 10) * 10;
+    /* ── De dónde sale la horquilla ───────────────────────────────────────
+       El metabolismo basal es lo único que la fórmula calcula sin que nadie
+       opine: con tu peso, tu altura y tu edad, sale lo que sale.
 
-    // Suelo de seguridad: nunca por debajo del metabolismo basal.
-    var suelo    = Math.round((tmb * (AJ.sueloSobreTMB || 1)) / 10) * 10;
-    var topado   = objetivo < suelo;
-    if (topado) objetivo = suelo;
+       El error entra justo después, al elegir el factor de actividad, porque
+       eso lo marca la persona a ojo. Quien dice «moderado» puede estar en
+       cualquier punto entre «ligero» y «alto». Así que en vez de fingir una
+       cifra exacta, movemos medio escalón de la escala arriba y abajo y
+       damos el rango que sale. Es la incertidumbre real del método. */
+    var paso   = typeof AJ.pasoActividad === 'number' ? AJ.pasoActividad : 0.175;
+    var facMin = Math.max(1.2, d.actividad - paso / 2);
+    var facMax = Math.min(1.9, d.actividad + paso / 2);
+
+    var tdee    = tmb * d.actividad;
+    var tdeeMin = aRedondo(tmb * facMin);
+    var tdeeMax = aRedondo(tmb * facMax);
+
+    var objMin = aRedondo(tmb * facMin * (1 + pct / 100));
+    var objMax = aRedondo(tmb * facMax * (1 + pct / 100));
+    var objMed = (objMin + objMax) / 2;
+
+    /* Suelo de seguridad: por debajo del metabolismo basal no se recomienda
+       nada, así que la horquilla entera sube hasta ahí si hiciera falta. */
+    var suelo  = aRedondo(tmb * (AJ.sueloSobreTMB || 1));
+    var topado = objMin < suelo;
+    if (topado) {
+      objMin = suelo;
+      if (objMax < objMin) objMax = objMin;
+      objMed = (objMin + objMax) / 2;
+    }
 
     /* ── Macros ──────────────────────────────────────────────────────────
-       Proteína y grasa se anclan al peso corporal (una por músculo, otra
-       por salud hormonal). El carbohidrato se queda con lo que sobra. */
-    var gPro = Math.round(d.proteina * d.peso);
-    var kPro = gPro * 4;
+       La proteína se ancla al peso corporal, no a las calorías: por eso su
+       rango no viene de la horquilla, sino de que cualquier valor en esa
+       franja de gramos por kilo funciona.
+       La grasa sí sigue a las calorías, así que se calcula en cada extremo.
+       El carbohidrato es el que se queda con lo que sobra. */
+    var gProMin = aRedondo(d.peso * Math.max(1, d.proteina - 0.2), 5);
+    var gProMax = aRedondo(d.peso * d.proteina, 5);
+    var gProMed = (gProMin + gProMax) / 2;
 
-    var gGraMin = (AJ.grasaMinimaPorKg || 0.6) * d.peso;
-    var gGra    = Math.round(Math.max(objetivo * ((AJ.grasaPorcentaje || 25) / 100) / 9, gGraMin));
-    var kGra    = gGra * 9;
+    var gGraMinimo = (AJ.grasaMinimaPorKg || 0.6) * d.peso;
+    var porcGrasa  = (AJ.grasaPorcentaje || 25) / 100;
+    var gGraMin = aRedondo(Math.max(objMin * porcGrasa / 9, gGraMinimo), 5);
+    var gGraMax = aRedondo(Math.max(objMax * porcGrasa / 9, gGraMinimo), 5);
 
-    var kCar = objetivo - kPro - kGra;
-    var apretado = false;
-    if (kCar < 0) {
-      // Caso extremo (objetivo muy bajo con proteína muy alta): en vez de dar
-      // un número negativo, dejamos el carbohidrato a cero y avisamos.
-      kCar = 0;
-      apretado = true;
-    }
-    var gCar = Math.round(kCar / 4);
+    /* El carbohidrato se queda con lo que sobra en cada extremo. Cada extremo
+       va con SU grasa: la grasa sigue a las calorías, así que en el extremo
+       bajo es baja. Cruzarlos (pocas calorías con mucha grasa) describiría un
+       escenario que no puede darse e inflaría el rango para nada. */
+    var restante = function (kcal, gGra) {
+      return Math.max(0, aRedondo((kcal - gProMed * 4 - gGra * 9) / 4, 5));
+    };
+    var gCarMin = restante(objMin, gGraMin);
+    var gCarMax = restante(objMax, gGraMax);
+
+    var apretado = gCarMax <= 0;
 
     // Ritmo de cambio estimado: 7.700 kcal ≈ 1 kg de grasa corporal.
-    var semanal = ((objetivo - tdee) * 7) / 7700;
-
-    var imc = d.peso / Math.pow(d.altura / 100, 2);
+    var semanalMin = ((objMin - tdeeMax) * 7) / 7700;
+    var semanalMax = ((objMax - tdeeMin) * 7) / 7700;
 
     return {
       tmb: Math.round(tmb),
       tdee: Math.round(tdee),
-      objetivo: objetivo,
+      tdeeMin: tdeeMin, tdeeMax: tdeeMax,
+      objMin: objMin, objMax: objMax, objMed: objMed,
       pct: pct,
-      diferencia: objetivo - Math.round(tdee),
+      diferencia: Math.round(objMed - tdee),
       topado: topado,
       apretado: apretado,
-      gPro: gPro, kPro: kPro,
-      gCar: gCar, kCar: kCar,
-      gGra: gGra, kGra: kGra,
+      gProMin: gProMin, gProMax: gProMax,
+      gCarMin: gCarMin, gCarMax: gCarMax,
+      gGraMin: gGraMin, gGraMax: gGraMax,
+      // Para la barra de proporciones basta con el punto medio.
+      kPro: gProMed * 4,
+      kCar: ((gCarMin + gCarMax) / 2) * 4,
+      kGra: ((gGraMin + gGraMax) / 2) * 9,
       agua: (d.peso * (AJ.aguaPorKg || 35)) / 1000,
-      semanal: semanal,
-      imc: imc
+      semanalMin: semanalMin, semanalMax: semanalMax,
+      imc: d.peso / Math.pow(d.altura / 100, 2)
     };
   }
 
@@ -294,44 +329,50 @@
     }
   }
 
+  /* Pinta una horquilla: «170 – 190 g». Si los dos extremos coinciden
+     (horquilla desactivada en la configuración), sale una cifra sola. */
+  function rango(a, b, unidad) {
+    var u = unidad ? '<u>' + unidad + '</u>' : '';
+    return a === b ? fmt(a) + u
+                   : fmt(a) + '<i>–</i>' + fmt(b) + u;
+  }
+
   function pintar(d, r) {
     $('error').hidden = true;
     $$('#form input[type="number"]').forEach(function (i) { i.removeAttribute('aria-invalid'); });
     $('vacio').hidden = true;
     $('res').hidden = false;
 
-    // Cifra grande
+    // Cifra grande: los dos extremos de la horquilla
     $('resLbl').textContent =
-      d.objetivo === 'perder'  ? 'Para perder grasa' :
-      d.objetivo === 'ganar'   ? 'Para ganar músculo' :
-                                 'Para mantenerte';
-    contarHasta($('resKcal'), r.objetivo);
-    contarHasta($('resTmb'),  r.tmb,  '<i>kcal</i>');
-    contarHasta($('resTdee'), r.tdee, '<i>kcal</i>');
+      d.objetivo === 'perder' ? 'Para perder grasa' :
+      d.objetivo === 'ganar'  ? 'Para ganar músculo' :
+                                'Para mantenerte';
+    contarHasta($('resMin'), r.objMin);
+    contarHasta($('resMax'), r.objMax);
+    contarHasta($('resTmb'), r.tmb, '<i>kcal</i>');
+    $('resTdee').innerHTML = rango(r.tdeeMin, r.tdeeMax, 'kcal');
 
-    // Pastilla de diferencia
+    // Pastilla de diferencia: en aproximado, que es lo que es
     var delta = $('resDelta');
     var uso   = delta.querySelector('use');
     var dif   = r.diferencia;
-    if (dif === 0) {
+    if (r.pct === 0) {
       delta.classList.add('res__delta--flat');
       uso.setAttribute('href', '#i-equal');
-      $('resDeltaTxt').textContent = 'Justo tu gasto: ni sube ni baja';
+      $('resDeltaTxt').textContent = 'Alrededor de tu gasto: ni sube ni baja';
     } else {
       delta.classList.remove('res__delta--flat');
       uso.setAttribute('href', dif < 0 ? '#i-down' : '#i-up');
       $('resDeltaTxt').textContent =
-        (dif < 0 ? '−' : '+') + fmt(Math.abs(dif)) + ' kcal · ' +
-        (dif < 0 ? 'déficit' : 'superávit') + ' del ' + Math.abs(r.pct) + ' %';
+        'Unas ' + fmt(aRedondo(Math.abs(dif))) + ' kcal ' + (dif < 0 ? 'por debajo' : 'por encima') +
+        ' de tu gasto · ' + (dif < 0 ? 'déficit' : 'superávit') + ' del ' + Math.abs(r.pct) + ' %';
     }
 
-    // Macros
-    contarHasta($('gPro'), r.gPro, '<i>g</i>');
-    contarHasta($('gCar'), r.gCar, '<i>g</i>');
-    contarHasta($('gGra'), r.gGra, '<i>g</i>');
-    $('kcalPro').textContent = fmt(r.kPro) + ' kcal';
-    $('kcalCar').textContent = fmt(r.kCar) + ' kcal';
-    $('kcalGra').textContent = fmt(r.kGra) + ' kcal';
+    // Macros, también en horquilla
+    $('gPro').innerHTML = rango(r.gProMin, r.gProMax, 'g');
+    $('gCar').innerHTML = rango(r.gCarMin, r.gCarMax, 'g');
+    $('gGra').innerHTML = rango(r.gGraMin, r.gGraMax, 'g');
 
     var total = r.kPro + r.kCar + r.kGra || 1;
     $('barPro').style.width = (r.kPro / total * 100) + '%';
@@ -339,19 +380,17 @@
     $('barGra').style.width = (r.kGra / total * 100) + '%';
 
     // Extras
-    $('resAgua').innerHTML  = fmt1(r.agua) + '<small>L</small>';
+    $('resAgua').innerHTML     = fmt1(r.agua) + '<small>L</small>';
     $('resImc').textContent    = fmt1(r.imc);
     $('resImcTxt').textContent = textoIMC(r.imc);
 
-    var s = r.semanal;
-    $('resRitmo').innerHTML = (Math.abs(s) < 0.05 ? '0' : (s < 0 ? '−' : '+') + fmt1(Math.abs(s)))
-                            + '<small>kg/sem</small>';
+    pintarRitmo(d, r);
 
     // Avisos
     var suelo = $('suelo');
     if (r.topado) {
       $('sueloTxt').innerHTML = 'Ese ritmo te dejaba por debajo de tu metabolismo basal, así que ' +
-        'lo he subido hasta <b>' + fmt(r.objetivo) + ' kcal</b>. Bajar de ahí no acelera nada: ' +
+        'la horquilla sube hasta <b>' + fmt(r.objMin) + ' kcal</b>. Bajar de ahí no acelera nada: ' +
         'te quita músculo, energía y ganas.';
       suelo.hidden = false;
     } else if (r.apretado) {
@@ -363,33 +402,157 @@
     }
 
     ultimo = { d: d, r: r };
-    actualizarCtaResultado();
+    pintarVeredicto();
+  }
+
+  /* El ritmo, sin sopa de signos. La dirección va en la etiqueta («Bajarías»,
+     «Subirías») y el valor se queda solo con la magnitud, de menos a más. */
+  function pintarRitmo(d, r) {
+    var etiqueta = $('resRitmoLbl');
+    var valor    = $('resRitmo');
+
+    if (d.objetivo === 'mantener') {
+      etiqueta.textContent = 'Ritmo';
+      var margen = Math.max(Math.abs(r.semanalMin), Math.abs(r.semanalMax));
+      valor.innerHTML = (margen < 0.05 ? 'Estable' : '±' + fmt1(margen))
+                      + '<small>kg/sem</small>';
+      return;
+    }
+
+    etiqueta.textContent = d.objetivo === 'perder' ? 'Bajarías' : 'Subirías';
+
+    var a = Math.abs(r.semanalMin), b = Math.abs(r.semanalMax);
+    var bajo = Math.min(a, b), alto = Math.max(a, b);
+    var mismo = fmt1(bajo) === fmt1(alto);
+
+    valor.innerHTML = (mismo ? fmt1(alto) : fmt1(bajo) + '<i>–</i>' + fmt1(alto))
+                    + '<small>kg/sem</small>';
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     5) COMPARTIR EL RESULTADO
+     LAS SEIS PREGUNTAS
+     ----------------------------------------------------------------------
+     No tocan el cálculo. Lo que hacen es decirle a la persona qué tiene
+     que pasar para que ese número signifique algo en su vida real.
      ══════════════════════════════════════════════════════════════════════ */
+
+  var PREGUNTAS = {
+    dieta:   { corto: 'el historial de dietas',
+               largo: 'vengo de meses a dieta baja en calorías' },
+    ojo:     { corto: 'las raciones a ojo',
+               largo: 'calculo las raciones a ojo, sin pesar' },
+    fuerza:  { corto: 'poco entrenamiento de fuerza',
+               largo: 'entreno fuerza menos de dos días por semana' },
+    finde:   { corto: 'el fin de semana',
+               largo: 'mi fin de semana no se parece a mi semana' },
+    salud:   { corto: 'la medicación o la condición médica',
+               largo: 'tomo medicación o tengo una condición médica' },
+    aplicar: { corto: 'llevarlo al plato',
+               largo: 'no sabría montar un día de comidas con esos gramos' }
+  };
+
+  function marcadas() {
+    return $$('#fiarLista input[type="checkbox"]')
+      .filter(function (i) { return i.checked; })
+      .map(function (i) { return i.getAttribute('data-q'); });
+  }
+
+  /* «a», «a y b», «a, b y c» */
+  function enumerar(lista) {
+    if (lista.length === 0) return '';
+    if (lista.length === 1) return lista[0];
+    return lista.slice(0, -1).join(', ') + ' y ' + lista[lista.length - 1];
+  }
+
+  function pintarVeredicto() {
+    var m = marcadas();
+    var n = m.length;
+    var caja = $('veredicto');
+    var cortos = m.map(function (k) { return PREGUNTAS[k].corto; });
+
+    $('veredictoPin').textContent = n + '/6';
+    caja.classList.toggle('veredicto--ojo', n > 0);
+
+    var titulo, texto;
+
+    if (n === 0) {
+      titulo = 'Ninguna te pasa';
+      texto = 'Entonces tu horquilla es un punto de partida sólido. Aun así sigue ' +
+              'siendo eso: un punto de partida. Saber cuántas calorías te tocan no es ' +
+              'lo mismo que saber <b>qué pones en el plato el martes por la noche</b>, ' +
+              'ni qué haces el día que la báscula lleva tres semanas parada.';
+    } else if (n <= 2) {
+      titulo = n === 1 ? 'Hay una cosa que mueve este número'
+                       : 'Hay dos cosas que mueven este número';
+      texto = 'Has marcado ' + enumerar(cortos) + '. Con eso encima, tu número real tira ' +
+              'hacia <b>el extremo bajo de la horquilla</b>, y conviene comprobarlo antes ' +
+              'de dar por buena ninguna cifra.';
+    } else if (n <= 4) {
+      titulo = 'Tu caso hay que medirlo, no estimarlo';
+      texto = 'Has marcado ' + n + ' de seis: ' + enumerar(cortos) + '. Cada una por ' +
+              'separado ya desplaza el resultado; juntas, la fórmula se queda corta. ' +
+              'Aquí ya no se trata de calcular mejor, sino de <b>seguir tus datos ' +
+              'semana a semana</b> y ajustar sobre lo que pase de verdad.';
+    } else {
+      titulo = 'Esta horquilla, sola, no te va a servir';
+      texto = 'Has marcado ' + n + ' de seis: ' + enumerar(cortos) + '. No es una mala ' +
+              'noticia y no significa que no puedas: significa que <b>el problema no era ' +
+              'el número</b>. Ninguna calculadora te va a resolver esto, porque lo que ' +
+              'falta no es el cálculo.';
+    }
+
+    $('veredictoTit').textContent = titulo;
+    $('veredictoTxt').innerHTML = texto;
+
+    var cta = $('ctaResTxt');
+    if (cta) {
+      cta.textContent = n >= 3
+        ? 'Cuéntale tu caso a Álvaro'
+        : 'Que Álvaro me lo convierta en un plan';
+    }
+
+    actualizarCtaResultado();
+    guardar();
+  }
 
   var NOMBRE_OBJ = { perder: 'perder grasa', mantener: 'mantenerme', ganar: 'ganar músculo' };
 
   function resumen() {
     if (!ultimo) return '';
     var d = ultimo.d, r = ultimo.r;
-    return 'Mis números de la calculadora del Método F90:\n\n' +
+
+    var linea = function (etiqueta, a, b, u) {
+      return '• ' + etiqueta + ': ' + (a === b ? fmt(a) : fmt(a) + '-' + fmt(b)) + ' ' + u;
+    };
+
+    var txt = 'Mis números de la calculadora del Método F90:\n\n' +
       '• Objetivo: ' + NOMBRE_OBJ[d.objetivo] + '\n' +
       '• Metabolismo basal: ' + fmt(r.tmb) + ' kcal\n' +
-      '• Mantenimiento: ' + fmt(r.tdee) + ' kcal\n' +
-      '• Comer al día: ' + fmt(r.objetivo) + ' kcal\n' +
-      '• Proteína: ' + fmt(r.gPro) + ' g\n' +
-      '• Carbohidratos: ' + fmt(r.gCar) + ' g\n' +
-      '• Grasas: ' + fmt(r.gGra) + ' g';
+      linea('Mantenimiento', r.tdeeMin, r.tdeeMax, 'kcal') + '\n' +
+      linea('Comer al día', r.objMin, r.objMax, 'kcal') + '\n' +
+      linea('Proteína', r.gProMin, r.gProMax, 'g') + '\n' +
+      linea('Carbohidratos', r.gCarMin, r.gCarMax, 'g') + '\n' +
+      linea('Grasas', r.gGraMin, r.gGraMax, 'g');
+
+    /* Lo que ha marcado es la parte que de verdad te sirve a ti: es su
+       situación contada por ella misma, sin tener que preguntársela. */
+    var m = marcadas();
+    if (m.length) {
+      txt += '\n\nDe las seis preguntas he marcado ' + m.length + ':\n' +
+        m.map(function (k) { return '• ' + PREGUNTAS[k].largo; }).join('\n');
+    } else {
+      txt += '\n\nDe las seis preguntas no he marcado ninguna.';
+    }
+
+    return txt;
   }
 
   function actualizarCtaResultado() {
     var a = $('ctaRes');
     if (!a) return;
     var url = enlaceContacto('Hola Álvaro, vengo de la calculadora.\n\n' + resumen() +
-                             '\n\n¿Me ayudas a montar el plan?');
+                             '\n\nYa tengo el número; lo que no sé es cómo llevarlo a mi día a día. ' +
+                             '¿Me echas una mano?');
     if (url) {
       a.href = url;
       a.target = '_blank';
@@ -451,7 +614,8 @@
         sexo: marcado('sexo'), objetivo: marcado('objetivo'), ritmo: marcado('ritmo'),
         formula: marcado('formula'), actividad: marcado('actividad'),
         edad: $('edad').value, altura: $('altura').value, peso: $('peso').value,
-        proteina: $('proteina').value, tocada: proteinaTocada
+        proteina: $('proteina').value, tocada: proteinaTocada,
+        marcadas: marcadas()
       }));
     } catch (e) { /* almacenamiento bloqueado: la página funciona igual */ }
   }
@@ -470,6 +634,13 @@
       if (g[n]) $(n).value = g[n];
     });
     proteinaTocada = !!g.tocada;
+
+    if (Array.isArray(g.marcadas)) {
+      g.marcadas.forEach(function (clave) {
+        var el = document.querySelector('#fiarLista input[data-q="' + clave + '"]');
+        if (el) el.checked = true;
+      });
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -513,6 +684,11 @@
 
     guardar();
   }
+
+  /* Las seis preguntas están en el panel del resultado, fuera del <form>,
+     así que no las alcanza el listener de abajo: van por su cuenta. */
+  var lista = $('fiarLista');
+  if (lista) lista.addEventListener('change', pintarVeredicto);
 
   form.addEventListener('input', actualizar);
   form.addEventListener('change', actualizar);
